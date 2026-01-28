@@ -1,0 +1,12 @@
+{
+  "buildCommand": "cd surfsense_web && npm install && npm run build",
+  "outputDirectory": "surfsense_web/.next",
+  "installCommand": "cd surfsense_web && npm install",
+  "framework": "nextjs",
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/surfsense_web/$1"
+    }
+  ]
+}
