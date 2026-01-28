@@ -1,0 +1,41 @@
+Kitab - AI-Powered Knowledge Management System
+Copyright 2026 Ahmed ElKodsh / Gentech
+
+This product includes software developed by MODSetter (SurfSense)
+Original project: https://github.com/MODSetter/SurfSense
+Licensed under the Apache License, Version 2.0
+
+================================================================================
+
+MODIFICATIONS:
+- Rebranded from "SurfSense" to "Kitab"
+- UI/UX customizations for Egyptian/MENA market
+- Arabic language support (planned)
+- Backend optimizations for LlamaIndex integration (planned)
+- Custom deployment configuration for Vercel/Railway
+- Local hosting and data sovereignty features
+
+================================================================================
+
+THIRD-PARTY COMPONENTS:
+
+This software includes the following third-party components:
+- SurfSense (Apache 2.0) - https://github.com/MODSetter/SurfSense
+- LlamaIndex - RAG framework
+- LangChain - Agent framework
+- FastAPI - Backend framework
+- Next.js - Frontend framework
+- PostgreSQL - Database
+- Redis - Caching
+
+For complete list of dependencies, see package.json and requirements.txt
+
+================================================================================
+
+Apache License 2.0 - Full text available in LICENSE file
+
+This product is designed for the Egyptian and MENA markets with features
+including local hosting, Arabic language support, and regional payment methods.
+
+Contact: ahmed@gentech.example (replace with actual contact)
+Website: https://kitab.example.com (replace with actual domain)
