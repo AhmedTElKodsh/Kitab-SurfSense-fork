@@ -11,6 +11,7 @@ from .google_calendar_add_connector_route import (
 from .google_gmail_add_connector_route import (
     router as google_gmail_add_connector_router,
 )
+from .health import router as health_router
 from .llm_config_routes import router as llm_config_router
 from .logs_routes import router as logs_router
 from .luma_add_connector_route import router as luma_add_connector_router
@@ -20,6 +21,7 @@ from .search_spaces_routes import router as search_spaces_router
 
 router = APIRouter()
 
+router.include_router(health_router)
 router.include_router(search_spaces_router)
 router.include_router(documents_router)
 router.include_router(podcasts_router)
