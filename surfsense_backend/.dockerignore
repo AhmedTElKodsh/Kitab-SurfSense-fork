@@ -1,12 +1,12 @@
-.git
-.gitignore
-.env
-.venv
+# Python
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
 .Python
+env/
+venv/
+ENV/
 build/
 develop-eggs/
 dist/
@@ -22,6 +22,45 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+
+# Testing
 .pytest_cache/
 .coverage
-htmlcov/ 
+htmlcov/
+.tox/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Documentation
+*.md
+docs/
+
+# Alembic
+alembic/versions/*.pyc
+
+# Environment
+.env
+.env.local
+
+# Logs
+*.log
+
+# Database
+*.db
+*.sqlite
+
+# Cache
+.cache/

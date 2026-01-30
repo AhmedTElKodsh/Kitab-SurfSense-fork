@@ -1,76 +1,53 @@
-FROM python:3.12-slim
+# Multi-stage build for smaller final image
+FROM python:3.12-slim as builder
 
+# Set working directory
 WORKDIR /app
 
-# Install system dependencies including SSL tools, CUDA dependencies, and Tesseract OCR
+# Install build dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
-    python3-dev \
-    ca-certificates \
-    curl \
-    wget \
-    unzip \
-    gnupg2 \
-    espeak-ng \
-    libsndfile1 \
-    libgl1 \
-    libglib2.0-0 \
-    libsm6 \
-    libxext6 \
-    libxrender1 \
+    g++ \
+    git \
     && rm -rf /var/lib/apt/lists/*
 
-# Update certificates and install SSL tools
-RUN update-ca-certificates
-RUN pip install --upgrade certifi pip-system-certs
-
 # Copy requirements
-COPY pyproject.toml .
-COPY uv.lock .
+COPY pyproject.toml ./
 
-# Install PyTorch based on architecture
-RUN if [ "$(uname -m)" = "x86_64" ]; then \
-        pip install --no-cache-dir torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121; \
-    else \
-        pip install --no-cache-dir torch torchvision torchaudio; \
-    fi
+# Install dependencies to a local directory
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir --target=/app/dependencies .
 
-# Install python dependencies
-RUN pip install --no-cache-dir uv && \
-    uv pip install --system --no-cache-dir -e .
+# Final stage - minimal runtime image
+FROM python:3.12-slim
 
-# Set SSL environment variables dynamically
-RUN CERTIFI_PATH=$(python -c "import certifi; print(certifi.where())") && \
-    echo "Setting SSL_CERT_FILE to $CERTIFI_PATH" && \
-    echo "export SSL_CERT_FILE=$CERTIFI_PATH" >> /root/.bashrc && \
-    echo "export REQUESTS_CA_BUNDLE=$CERTIFI_PATH" >> /root/.bashrc
-ENV SSL_CERT_FILE=/usr/local/lib/python3.12/site-packages/certifi/cacert.pem
-ENV REQUESTS_CA_BUNDLE=/usr/local/lib/python3.12/site-packages/certifi/cacert.pem
+# Set working directory
+WORKDIR /app
 
-# Pre-download EasyOCR models to avoid runtime SSL issues
-RUN mkdir -p /root/.EasyOCR/model
-RUN wget --no-check-certificate https://github.com/JaidedAI/EasyOCR/releases/download/v1.3/english_g2.zip -O /root/.EasyOCR/model/english_g2.zip || true
-RUN wget --no-check-certificate https://github.com/JaidedAI/EasyOCR/releases/download/pre-v1.1.6/craft_mlt_25k.zip -O /root/.EasyOCR/model/craft_mlt_25k.zip || true
-RUN cd /root/.EasyOCR/model && (unzip -o english_g2.zip || true) && (unzip -o craft_mlt_25k.zip || true)
+# Install only runtime dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libgomp1 \
+    && rm -rf /var/lib/apt/lists/*
 
-# Pre-download Docling models
-RUN python -c "try:\n    from docling.document_converter import DocumentConverter\n    conv = DocumentConverter()\nexcept:\n    pass" || true
+# Copy installed dependencies from builder
+COPY --from=builder /app/dependencies /usr/local/lib/python3.12/site-packages/
 
-# Install Playwright browsers for web scraping if needed
-RUN pip install playwright && \
-    playwright install chromium
-
-# Copy source code
+# Copy application code
 COPY . .
 
-# Copy and set permissions for entrypoint script
-COPY scripts/docker/entrypoint.sh /app/scripts/docker/entrypoint.sh
-RUN chmod +x /app/scripts/docker/entrypoint.sh
-
-# Prevent uvloop compatibility issues
+# Set environment variables
 ENV PYTHONPATH=/app
-ENV UVICORN_LOOP=asyncio
+ENV PYTHONUNBUFFERED=1
+ENV TRANSFORMERS_OFFLINE=1
+ENV HF_HUB_OFFLINE=1
 
-# Run
-EXPOSE 8000-8001
-CMD ["/app/scripts/docker/entrypoint.sh"] 
+# Expose port
+EXPOSE 8000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+    CMD python -c "import requests; requests.get('http://localhost:8000/api/v1/health')"
+
+# Start command
+CMD ["uvicorn", "app.app:app", "--host", "0.0.0.0", "--port", "8000"]
+
