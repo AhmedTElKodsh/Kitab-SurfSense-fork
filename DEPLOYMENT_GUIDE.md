@@ -1,29 +1,29 @@
 # Kitab Platform - Deployment Guide
 
-This guide walks through deploying the Kitab platform to production using Railway (backend), Vercel (frontend), and Supabase (database).
+This guide walks through deploying the Kitab platform to production using Render (backend), Vercel (frontend), and Supabase (database).
 
 ## Prerequisites
 
 - GitHub account with access to this repository
-- Railway account (https://railway.app)
+- Render account (https://render.com)
 - Vercel account (https://vercel.com)
 - Supabase account (https://supabase.com)
-- Upstash account for Redis (https://upstash.com) - optional, can use Railway Redis
+- Upstash Redis (provided credentials)
 
 ## Deployment Sequence
 
 **IMPORTANT**: Follow this exact order to resolve circular dependencies:
 
-1. Deploy Railway Backend (with temporary CORS: `*`)
-2. Deploy Vercel Frontend (using Railway URL)
-3. Update Railway CORS (with actual Vercel URL)
+1. Deploy Render Backend (with temporary CORS: `*`)
+2. Deploy Vercel Frontend (using Render URL)
+3. Update Render CORS (with actual Vercel URL)
 4. Configure Supabase and run migrations
-5. Set up Redis for Celery
-6. Deploy Celery Worker
+5. Upstash Redis already configured
+6. Deploy Celery Worker on Render
 
 ---
 
-## Step 1: Railway Backend Deployment (Initial)
+## Step 1: Render Backend Deployment (Initial)
 
 ### 1.1 Create Railway Project
 
